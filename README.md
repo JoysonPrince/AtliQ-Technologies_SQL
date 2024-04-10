@@ -110,7 +110,16 @@
 
 
 
---> There might be a customer who has many customer_codes, we can use find_in_set() function there, cast it as TEXT data type and we can get the result set
+![GS_monthly_Girias_stored_proc](https://github.com/JoysonPrince/AtliQ-Technologies_SQL/assets/137388224/7dcc4854-6211-48ef-ac2c-6161c79f963c)
+
+
+
+
+
+
+# *Task 5:* Stored Proc to generate Gross sales reports for Amazon India
+--> Amazon India has 2 different customer codes (due to AtliQ might have stopped business with Amazon for a while and resumed later)
+--> For the cases of multiple customer_codes, we can use find_in_set() function there, cast it as TEXT data type and we can get the result set
 --> I've crafted a separate stored procedure to get gross sales report for Amazon ( because Amazon has multiple customer_codes)
 
 
@@ -121,5 +130,139 @@
 
 
 
-![GS_monthly_Girias_stored_proc](https://github.com/JoysonPrince/AtliQ-Technologies_SQL/assets/137388224/7dcc4854-6211-48ef-ac2c-6161c79f963c)
+
+
+
+# *Task 6:*
+Create a stored procedure that can determine the market badge based on sold quantities
+--> If total sold qty > 10 million, then Gold badge; else if total sold qty < 10 million and > 5 million, then Silver badge, else Bronze badge
+    --> User input should be 1) Market and 2) FY and the output should be market badge
+
+--> This logic is used in the businesses to determine where have AtliQ garnered more sales!
+
+
+![market badge result set](https://github.com/JoysonPrince/AtliQ-Technologies_SQL/assets/137388224/af16f7f1-5316-4b58-8a63-3a8d576cbb3e)
+
+
+
+
+
+
+
+
+# *Task 7:* 
+--> Generate a report showing top selling products, customers and markets by FY and their Net Sales
+-- As I've come to notice that inorder to get net sales, I need to do multiple joins on multiple tables like fact_pre_invoice_deductions, fact_post_invoice_deductions, fact_gross_price, dim_product, dim_customer, etc.
+-- Thus, the query fetch and duration time is hindered, therefore there is a need to figure out a way to reduce the query fetch time
+
+Query performance improvement:
+Method 1: Creating a dim_date table in Excel:
+-- Figure out the date values from the dimension tables, in this case the data has date values from 2017-09-01 to 2021-12-01 (read YYYY-MM-DD)
+-- Create a manual table within MySQL workbench giving 2 columns, one for calendar date from Excel and the other a generated column from MySQL
+   (Use YEAR(date + INTERVAL 4 MONTH)) for fiscal years.
+-- Thus, by having a dim_date table, we need not use the fiscal_year user-defined function which was created earlier
+-- **This method reduced the query fetch time from 11 seconds to 3.2 seconds, which is impressive, considering the data has 1.9 million records.**
+
+Method 2: Creating a fiscal year column within our fact_sales_monthly table
+-- Using the same formula (YEAR(date + INTERVAL 4 MONTH)), I created a new column called fiscal_year
+-- Thus, as I've created a fiscal_year column within fact_sales_monthly table, this eliminates the usage of Fiscal_year function and dim_date table Joins.
+-- **Query fetch time reduced from 3.2 seconds to under 1.1 seconds**
+
+
+# *Task 7 continuation:*
+--> Joining tables dim_product, dim_customer, fact_gross_price and fact_pre_invoice_deductions will get us pre_invoice_discounts and total_gross_price column
+--> From here, we need Net Invoice Sales, which is the difference between gross price and pre_invoice_discounts
+--> Since, total_gross_price is a calculated column within this result set, we cannot calculate NIS from a derived column
+--> Used CTE's to achieve this task (refer screenshot below)
+--> From this result set, we need to join fact_post_invoice_deductions table to get post_invoice discounts column, and again the code might get longer
+--> Creating a VIEW for pre_invoice, post_invoice etc will simplify the tasks ahead.
+
+
+![pre_invoice view](https://github.com/JoysonPrince/AtliQ-Technologies_SQL/assets/137388224/c2bb54fd-7a96-47e9-9a75-50fc75199440)
+
+
+
+
+
+
+
+![post_invoice view](https://github.com/JoysonPrince/AtliQ-Technologies_SQL/assets/137388224/1e87220f-b155-44e5-88ae-4e454ff72d05)
+
+
+
+
+
+
+
+
+![net sales view](https://github.com/JoysonPrince/AtliQ-Technologies_SQL/assets/137388224/f8f0421b-10e8-44f1-986a-9565ec1de38a)
+
+
+
+
+
+
+
+
+
+
+--> After getting, post_invoice and pre_invoice along with NIS, net sales is calculated NS = [NIS - (NIS*post_invoice)]
+--> Created a VIEW for net sales as well
+--> And, therefore from this net sales VIEW, the following can be generated as a report:-
+    1. Top-5 Customers by net sales and Fical years
+    2. Top-5 Markets by net sales and Fical years
+    3. Top-5 Products by net sales and Fical years
+
+
+
+
+![top5 customers](https://github.com/JoysonPrince/AtliQ-Technologies_SQL/assets/137388224/1f295835-064f-45b1-bfa0-1389526454ab)
+
+
+
+
+
+
+
+
+
+
+![top5 markets](https://github.com/JoysonPrince/AtliQ-Technologies_SQL/assets/137388224/34c22c61-85d5-45c7-963a-317168b36f40)
+
+
+
+
+
+
+
+
+
+
+![top5 products](https://github.com/JoysonPrince/AtliQ-Technologies_SQL/assets/137388224/1c0a07e1-760b-4b0e-9581-976aac2c119b)
+
+
+
+
+
+# ***Concepts learnt:***
+*1. Demonstrated proficiency in SQL through a sales and finance project, showcasing expertise in analytics and metrics generation tailored to meet team objectives.*
+
+*2. Utilized domain knowledge to develop user-defined functions for creating fiscal year, quarter, and month, enhancing data organization and analysis capabilities.*
+
+*3. Implemented advanced SQL techniques including stored procedures, common table expressions (CTEs), and views to streamline data manipulation and retrieval processes.*
+
+*4. Leveraged subqueries effectively to extract and analyze subsets of data, enabling insightful decision-making for the sales and finance teams.*
+
+*5. Successfully integrated analytical insights into actionable strategies, contributing to improved performance and informed decision-making within the organization.*
+
+*6. Documented project details and SQL solutions on GitHub, providing a transparent and accessible resource for potential collaborators or employers to review expertise and 
+    project contributions.*
+
+
+
+
+
+And that concludes the project.
+Thanks a lot for visiting my portfolio.
+
 
